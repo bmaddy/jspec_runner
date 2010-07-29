@@ -1,0 +1,8 @@
+.autotest
+History.txt
+Manifest.txt
+README.txt
+Rakefile
+bin/jspec_runner
+lib/jspec_runner.rb
+test/test_jspec_runner.rb
