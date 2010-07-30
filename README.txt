@@ -1,10 +1,10 @@
 = jspec_runner
 
-* FIX (url)
+* http://github.com/bmaddy/jspec_runner
 
 == DESCRIPTION:
 
-FIX (describe your package)
+Runs jspec tests from inside rails tests
 
 == FEATURES/PROBLEMS:
 
