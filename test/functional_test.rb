@@ -8,10 +8,11 @@ class FunctionalsController < ActionController::Base
     render :text => <<-HTML
       <html>
         <head>
-          <script src="public/javascripts/change_body.js"></script>
+          <script type="text/javascript" src="javascripts/jquery-1.4.2.min.js"></script>
+          <script type="text/javascript" src="javascripts/change_body.js"></script>
           <title>page title</title>
         </head>
-        <body>
+        <body onload="change_body()">
           <div>initial content</div>
         </body>
       </html>
@@ -20,18 +21,29 @@ class FunctionalsController < ActionController::Base
 end
 
 class FunctionalsControllerTest < ActionController::TestCase
-  test "should move javascript from rendered page to the jSpec DOM formatter page" do
-    get :page
-    assert_select js_dom, "html", :count => 1
-    jspec do |js|
-      # js.exec 'unit/page/spec.passes.js'
-    end
-    assert_select js_dom, "html", :count => 1
-  end
-  
-  test "should execute javascript that was included in the head tag" do
+  test "be able to find and execute scripts in the head tag" do
     get :page
     assert_select js_dom, "body", :text => "body changed by change_body.js"
+  end
+  
+  test "should have the <script> from @response.body and have the jSpec DOM formatter page" do
+    get :page
+    assert_select js_dom, "html", :count => 1
+    jspec :execs => ['unit/spec.passes.js']
+    # <script> from @response.body
+    assert_select js_dom, "head script[src$=?][type=?]", "javascripts/change_body.js", "text/javascript"
+    # jspec DOM formatter stuff
+    assert_select js_dom, "script[src$=?]", "jspec.js"
+    assert_select js_dom, "script[src$=?]", "jspec.xhr.js"
+    assert_select js_dom, "script[src$=?]", "spec/unit/spec.j_spec_runner.helper.js"
+    assert_match Regexp.new(Regexp.escape(".exec('unit/spec.passes.js')")), js_dom.to_s
+    assert_select js_dom, "body.jspec"
+    assert_select js_dom, "div#jspec-top" do
+      assert_select "#jspec-title em", :text => /\d/
+    end
+    # debugger
+    assert_select js_dom, "div#jspec"
+    assert_select js_dom, "div#jspec-bottom"
   end
   
   # test "a passing spec" do
