@@ -1,4 +1,3 @@
-# require 'test/unit'
 require 'action_controller'
 require 'action_controller/integration'
 
@@ -15,9 +14,5 @@ end
 
 ActionController::Routing::Routes.draw do |map|
   map.connect '/page', :controller => 'functionals', :action => 'page'
+  map.connect '/xhr', :controller => 'functionals', :action => 'xhr'
 end
-
-# ActionController::Base.session = {
-#   :key    => "_myapp_session",
-#   :secret => "some secret phrase" * 5
-# }

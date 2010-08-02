@@ -1,5 +1,3 @@
-// console.log('from spec failure')
-// 
 describe 'Page'
   
   before_each

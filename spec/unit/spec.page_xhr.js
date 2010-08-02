@@ -1,4 +1,4 @@
-describe 'Page'
+describe 'Page with XHR'
   
   before_each
     $page = $(fixture('page'))
@@ -12,12 +12,12 @@ describe 'Page'
   
   describe 'initialize'
     before_each
-      change_body($page)
+      change_body_xhr($page)
     end
     
     describe 'after initialization'
       it 'should have a title'
-        $page.find('p').html().should_equal "body changed by change_body.js"
+        $page.find('p').html().should_equal "body changed by xhr response"
       end
     end
   end

@@ -1,7 +1,5 @@
 require 'rubygems' unless Object.const_defined?(:Gem)
 require "test/test_helper"
-# require "test/unit"
-# require "jspec_runner"
 
 class FunctionalsController < ActionController::Base
   def page
@@ -17,6 +15,10 @@ class FunctionalsController < ActionController::Base
         </body>
       </html>
     HTML
+  end
+  
+  def xhr
+    render :text => "xhr response"
   end
 end
 
@@ -49,12 +51,12 @@ class FunctionalsControllerTest < ActionController::TestCase
   
   test "a failing spec should fail" do
     get :page
-    # you should see a failed test here and raise an exception
+    
     result = jspec(:execs => ['unit/spec.failure.js'])
     expected = <<-TEXT
 
 Page before initialization
-this test should fail, expected "one" to be "two"
+\e[31mFailed\e[0m: this test should fail, expected "one" to be "two"
 expect("one").should(equal, "two");
 
 JSpec: 0 passes, 1 failures
@@ -70,26 +72,47 @@ JSpec: 0 passes, 1 failures
     end
   end
   
-  # test "a passing spec" do
-  #   get :page
-  #   jspec :execs => ['unit/spec.page.js']
+  test "a passing spec" do
+    get :page
+    assert_jspec :execs => ['unit/spec.page.js']
+  end
+  
+  test "text with xhr" do
+    get :page
+    assert_jspec :execs => ['unit/spec.page_xhr.js']
+  end
+  
+  # test "should give a message if the route doesn't exist" do
+  #   # TODO: If the route doesn't exist we should at least get something output
+  #   # (preferably an error, but holygrail doesn't do that yet either)
+  #   assert_raises ActionController::RoutingError do
+  #     assert_jspec :execs => ['unit/spec.xhr_route_error.js']
+  #   end
   # end
-  # 
-  # test "multiple passing specs" do
-  #   
-  # end
-  # 
-  # test "first spec failing" do
-  #   
-  # end
-  # 
-  # test "second spec failing" do
-  #   
-  # end
+  
+  test "multiple passing specs" do
+    get :page
+    assert_jspec :execs => ['unit/spec.page.js', 'unit/spec.page_xhr.js']
+  end
+  
+  test "first spec failing" do
+    get :page
+    assert_raises Test::Unit::AssertionFailedError do
+      assert_jspec :execs => ['unit/spec.failure.js', 'unit/spec.page_xhr.js']
+    end
+  end
+  
+  test "second spec failing" do
+    get :page
+    assert_raises Test::Unit::AssertionFailedError do
+      assert_jspec :execs => ['unit/spec.page.js', 'unit/spec.failure.js']
+    end
+  end
   
   private
   
   # this method is only here until my patch to add it to holygrail is accepted
+  # TODO: consider not requiring holygrail
   def js_dom
     # force holygrail to set @__page
     js('true') unless @__page

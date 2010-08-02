@@ -28,7 +28,7 @@ module JSpecRunner
     end
     
     def log(s)
-      # can't seem to figure out where the logger is...
+      # TODO: can't seem to figure out where the logger is...
       # context.instance_eval do
       #   RAILS_DEFAULT_LOGGER.info s
       #   logger.info s
@@ -53,6 +53,7 @@ module JSpecRunner
         this.readyState = 4
         this.onreadystatechange()
       }
+      // makes for some easier debugging
       console = {log: function(s){ Ruby.JSpecRunner.XhrProxy.log(s) }}
     </script>
     JS
@@ -92,13 +93,17 @@ module JSpecRunner
         output = HTML::Selector.new("tr").select(wrapper).map do |row|
           if row.attributes["class"] == "description"
             "\n" + text_only(row)
+          elsif HTML::Selector.new(".pass").select(row).any?
+            "\e[32mPassed\e[0m: " + text_only(row)
+          elsif HTML::Selector.new(".failed").select(row).any?
+            "\e[31mFailed\e[0m: " + text_only(row)
           else
             text_only(row)
           end
         end
         output = output.join("\n") + "\n\nJSpec: #{select_text(wrapper, ".heading .passes em")} passes, #{select_text(wrapper, ".heading .failures em")} failures\n"
-        # puts output
-        # raise AssertionFailedError, output
+        # puts js_dom
+        
         result = {:passed => false, :output => output}
       end
       return result
