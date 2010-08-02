@@ -12,8 +12,8 @@ class FunctionalsController < ActionController::Base
           <script type="text/javascript" src="javascripts/change_body.js"></script>
           <title>page title</title>
         </head>
-        <body onload="change_body()">
-          <div>initial content</div>
+        <body onload="change_body(document.body)">
+          <div><p>initial content</p></div>
         </body>
       </html>
     HTML
@@ -28,42 +28,55 @@ class FunctionalsControllerTest < ActionController::TestCase
   
   test "should have the <script> from @response.body and have the jSpec DOM formatter page" do
     get :page
+    
     assert_select js_dom, "html", :count => 1
-    jspec :execs => ['unit/spec.passes.js']
+    jspec :execs => ['unit/spec.page.js']
+    
     # <script> from @response.body
     assert_select js_dom, "head script[src$=?][type=?]", "javascripts/change_body.js", "text/javascript"
     # jspec DOM formatter stuff
     assert_select js_dom, "script[src$=?]", "jspec.js"
     assert_select js_dom, "script[src$=?]", "jspec.xhr.js"
     assert_select js_dom, "script[src$=?]", "spec/unit/spec.j_spec_runner.helper.js"
-    assert_match Regexp.new(Regexp.escape(".exec('unit/spec.passes.js')")), js_dom.to_s
+    assert_match Regexp.new(Regexp.escape(".exec('unit/spec.page.js')")), js_dom.to_s
     assert_select js_dom, "body.jspec"
     assert_select js_dom, "div#jspec-top" do
       assert_select "#jspec-title em", :text => /\d/
     end
-    # debugger
     assert_select js_dom, "div#jspec"
     assert_select js_dom, "div#jspec-bottom"
   end
   
+  test "a failing spec should fail" do
+    get :page
+    # you should see a failed test here and raise an exception
+    result = jspec(:execs => ['unit/spec.failure.js'])
+    expected = <<-TEXT
+
+Page before initialization
+this test should fail, expected "one" to be "two"
+expect("one").should(equal, "two");
+
+JSpec: 0 passes, 1 failures
+    TEXT
+    assert_equal false, result[:passed]
+    assert_equal expected, result[:output]
+  end
+  
+  test "a failing assert_jspec should fail" do
+    get :page
+    assert_raises Test::Unit::AssertionFailedError do
+      assert_jspec :execs => ['unit/spec.failure.js']
+    end
+  end
+  
   # test "a passing spec" do
   #   get :page
-  #   jspec do
-  #     flunk
-  #     # exec 'unit/page/spec.passes.js'
-  #   end
+  #   jspec :execs => ['unit/spec.page.js']
   # end
   # 
   # test "multiple passing specs" do
   #   
-  # end
-  # 
-  # test "a failing spec" do
-  #   assert_raises AssertionFailedError do
-  #     jspec do
-  #       exec 'unit/page/spec.fails.js'
-  #     end
-  #   end
   # end
   # 
   # test "first spec failing" do
