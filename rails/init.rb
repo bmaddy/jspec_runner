@@ -1,5 +1,5 @@
 require 'pathname'
-require  Pathname(__FILE__).dirname.parent + 'lib/j_spec_runner'
+require  Pathname(__FILE__).dirname.parent + 'lib/jspec_runner'
 
 class ActionController::TestCase
   include JSpecRunner::Extensions

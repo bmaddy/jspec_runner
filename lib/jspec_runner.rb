@@ -3,7 +3,7 @@ require 'holygrail'
 require 'nokogiri'
 
 module JSpecRunner
-  VERSION = '1.0.0'
+  VERSION = '0.1.0'
   
   # This module allows routing ajax requests to rails controllers
   #

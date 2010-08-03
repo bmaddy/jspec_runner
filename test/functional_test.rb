@@ -1,4 +1,3 @@
-require 'rubygems' unless Object.const_defined?(:Gem)
 require "test/test_helper"
 
 class FunctionalsController < ActionController::Base
