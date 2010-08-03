@@ -13,7 +13,7 @@ class IntegrationTest < ActionController::IntegrationTest
     jspec :execs => ['unit/spec.page.js']
     
     # <script> from @response.body
-    assert_select js_dom, "head script[src$=?][type=?]", "javascripts/change_body.js", "text/javascript"
+    assert_select js_dom, "script[src$=?][type=?]", "javascripts/change_body.js", "text/javascript"
     # jspec DOM formatter stuff
     assert_select js_dom, "script[src$=?]", "jspec.js"
     assert_select js_dom, "script[src$=?]", "jspec.xhr.js"
@@ -37,7 +37,7 @@ Page before initialization
 \e[31mFailed\e[0m: this test should fail, expected "one" to be "two"
 expect("one").should(equal, "two");
 
-JSpec: 0 passes, 1 failures
+JSpec: \e[32m0 passes\e[0m, \e[31m1 failures\e[0m
     TEXT
     assert_equal false, result[:passed]
     assert_equal expected, result[:output]

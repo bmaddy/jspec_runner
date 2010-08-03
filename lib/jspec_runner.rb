@@ -40,24 +40,6 @@ module JSpecRunner
 
   module Extensions
     
-    # JS script to reroute ajax requests through XhrProxy
-    #
-    # @private
-    XHR_MOCK_SCRIPT = <<-JS
-    <script>
-      XMLHttpRequest.prototype.open = function(method, url, async, username, password) {
-        this.info = { method: method, url: url }
-      }
-      XMLHttpRequest.prototype.send = function(data) {
-        this.responseText = Ruby.JSpecRunner.XhrProxy.request(this.info, data)
-        this.readyState = 4
-        this.onreadystatechange()
-      }
-      // makes for some easier debugging
-      console = {log: function(s){ Ruby.JSpecRunner.XhrProxy.log(s) }}
-    </script>
-    JS
-    
     def assert_jspec(options={})
       result = jspec(options)
       assert_block(build_message("One or more specs failed", result[:output])) { result[:passed] }
@@ -85,10 +67,11 @@ module JSpecRunner
       
       # TODO: consider making this gem use Harmony and not depend on HolyGrail -- too much duplication here
       XhrProxy.context = self
-      @__page = Harmony::Page.new(XHR_MOCK_SCRIPT + rewrite_script_paths(html))
+      @__page = Harmony::Page.new(rewrite_script_paths(html))
       Harmony::Page::Window::BASE_RUNTIME.wait
       
       result = {:passed => true}
+      js_dom = HTML::Document.new(@__page.to_html, false, true).root
       HTML::Selector.new(".has-failures").select(js_dom).each do |wrapper|
         output = HTML::Selector.new("tr").select(wrapper).map do |row|
           if row.attributes["class"] == "description"
@@ -101,7 +84,7 @@ module JSpecRunner
             text_only(row)
           end
         end
-        output = output.join("\n") + "\n\nJSpec: #{select_text(wrapper, ".heading .passes em")} passes, #{select_text(wrapper, ".heading .failures em")} failures\n"
+        output = output.join("\n") + "\n\nJSpec: \e[32m#{select_text(wrapper, ".heading .passes em")} passes\e[0m, \e[31m#{select_text(wrapper, ".heading .failures em")} failures\e[0m\n"
         # puts js_dom
         
         result = {:passed => false, :output => output}
@@ -127,12 +110,28 @@ module JSpecRunner
       <<-HTML
         <html>
           <head>
+            <script>
+              // JS script to reroute ajax requests through XhrProxy
+              if(typeof(Ruby) != "undefined"){
+                XMLHttpRequest.prototype.open = function(method, url, async, username, password) {
+                  this.info = { method: method, url: url }
+                }
+                XMLHttpRequest.prototype.send = function(data) {
+                  this.responseText = Ruby.JSpecRunner.XhrProxy.request(this.info, data)
+                  this.readyState = 4
+                  this.onreadystatechange()
+                }
+                // makes for some easier debugging
+                console = {log: function(s){ Ruby.JSpecRunner.XhrProxy.log(s) }}
+              }
+            </script>
             <link type="text/css" rel="stylesheet" href="#{Gem.find_files('jspec.css').first}" />
-            <script src="#{Gem.find_files('jspec.js').first}"></script>
-            <script src="#{Gem.find_files('jspec.xhr.js').first}"></script>
             <userscripts/>
+            <script src="#{Gem.find_files('jspec.js').first}"></script>
+            <script src="#{Gem.find_files('jspec.jquery.js').first}"></script>
+            <script src="#{Gem.find_files('jspec.xhr.js').first}"></script>
             <script src="#{Rails.root.join('spec/unit/spec.helper.js')}"></script>
-            <script src="#{Gem.find_files('spec/unit/spec.jspec_runner.helper.js')}"></script>
+            <script src="#{Gem.find_files('spec/unit/spec.jspec_runner.helper.js').first}"></script>
             <runSuites/>
           </head>
           <body class="jspec" onLoad="runSuites();">
