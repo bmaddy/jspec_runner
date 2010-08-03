@@ -1,26 +1,5 @@
 require "test/test_helper"
 
-class FunctionalsController < ActionController::Base
-  def page
-    render :text => <<-HTML
-      <html>
-        <head>
-          <script type="text/javascript" src="javascripts/jquery-1.4.2.min.js"></script>
-          <script type="text/javascript" src="javascripts/change_body.js"></script>
-          <title>page title</title>
-        </head>
-        <body onload="change_body(document.body)">
-          <div><p>initial content</p></div>
-        </body>
-      </html>
-    HTML
-  end
-  
-  def xhr
-    render :text => "xhr response"
-  end
-end
-
 class FunctionalsControllerTest < ActionController::TestCase
   test "be able to find and execute scripts in the head tag" do
     get :page

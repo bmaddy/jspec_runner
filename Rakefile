@@ -33,6 +33,6 @@ end
 
 task :install => :package do
   $:<< 'lib'
-  require 'volleyball'
-  puts `gem install pkg/volleyball-#{Volleyball::VERSION}.gem`
+  require 'jspec_runner'
+  puts `gem install pkg/jspec_runner-#{JSpecRunner::VERSION}.gem`
 end
