@@ -38,7 +38,7 @@ class FunctionalsControllerTest < ActionController::TestCase
     # jspec DOM formatter stuff
     assert_select js_dom, "script[src$=?]", "jspec.js"
     assert_select js_dom, "script[src$=?]", "jspec.xhr.js"
-    assert_select js_dom, "script[src$=?]", "spec/unit/spec.j_spec_runner.helper.js"
+    assert_select js_dom, "script[src$=?]", "spec/unit/spec.jspec_runner.helper.js"
     assert_match Regexp.new(Regexp.escape(".exec('unit/spec.page.js')")), js_dom.to_s
     assert_select js_dom, "body.jspec"
     assert_select js_dom, "div#jspec-top" do

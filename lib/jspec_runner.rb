@@ -132,7 +132,7 @@ module JSpecRunner
             <script src="#{Gem.find_files('jspec.xhr.js').first}"></script>
             <userscripts/>
             <script src="#{Rails.root.join('spec/unit/spec.helper.js')}"></script>
-            <script src="#{Gem.find_files('spec/unit/spec.j_spec_runner.helper.js')}"></script>
+            <script src="#{Gem.find_files('spec/unit/spec.jspec_runner.helper.js')}"></script>
             <runSuites/>
           </head>
           <body class="jspec" onLoad="runSuites();">
